@@ -49,9 +49,11 @@ namespace Booking_API
             builder.Services.AddScoped<ICountryService, CountryService>();
             builder.Services.AddScoped<IService<City>, Service<City>>();
             builder.Services.AddScoped<IService<Country>, Service<Country>>();
-
+            builder.Services.AddScoped<IHotelBookingService, HotelBookingService>();
+            builder.Services.AddScoped<IHotelBookingRepository, HotelBookingRepository>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
             builder.Services.AddAutoMapper(typeof(MappingProfile));
+
 
             // Add JWT Authentication
             var key = Encoding.ASCII.GetBytes(builder.Configuration["JWT:SecKey"]);
@@ -99,6 +101,7 @@ namespace Booking_API
             app.UseRouting();
 
             // Use Authentication and Authorization middleware
+            app.UseStaticFiles();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseCors("AllowAllOrigins");

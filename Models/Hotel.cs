@@ -15,7 +15,7 @@ namespace Booking_API.Models
         public string? Description { get; set; }
 
         [Range(0, 5)]
-        public int Rating { get; set; }
+        public int? Rating { get; set; }
         
 
         [Phone]
@@ -41,10 +41,7 @@ namespace Booking_API.Models
         public ICollection<Room> Rooms { get; set; } = new HashSet<Room>();
         public ICollection<Feature> Features { get; set; } = new HashSet<Feature>();
         public ICollection<HotelPhoto> Photos { get; set; } = new HashSet<HotelPhoto>();
-
-
-
-        
+        public ICollection<HotelBooking> HotelBookings { get; set; } = new HashSet<HotelBooking>();
         
     }
 }
