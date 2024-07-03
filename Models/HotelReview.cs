@@ -14,14 +14,25 @@ namespace Booking_API.Models
         [StringLength(1000, ErrorMessage = "Comment cannot be longer than 1000 characters")]
         public string? Comment { get; set; }
 
-        [Required]
-        public DateTime ReviewDate { get; set; } = DateTime.Now;
+        
+        public DateTime? ReviewDate { get; set; } = DateTime.Now;
 
         //Foreign Keys
         [ForeignKey("HotelBooking")]
-        public int HotelBookingId { get; set; }
+        public int? HotelBookingId { get; set; }
+
+        [ForeignKey("Hotel")]
+        public int? HotelId { get; set; }
+
+        [ForeignKey("ApplicationUser")]
+        public int? UserId { get; set; }
+
 
         //Navigation Properties
         public HotelBooking? HotelBooking { get; set; }
+
+        public Hotel? Hotel { get; set; }
+
+        public ApplicationUser? ApplicationUser { get; set; }
     }
 }

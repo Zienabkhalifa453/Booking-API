@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using AutoMapper;
 
 namespace Booking_API
 {
@@ -27,18 +26,16 @@ namespace Booking_API
             {
                 option.UseSqlServer(builder.Configuration.GetConnectionString("cs"));
             });
+
             // Configure Identity
             builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
                 .AddEntityFrameworkStores<BookingContext>()
                 .AddDefaultTokenProviders();
 
-            // Register the UserManager and RoleManager services
             builder.Services.AddScoped<UserManager<ApplicationUser>>();
             builder.Services.AddScoped<RoleManager<ApplicationRole>>();
-
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddScoped<IBookingService, BookingService>();
-            builder.Services.AddScoped<IPaymentService, PaymentService>();
+            builder.Services.AddScoped<IHotelBookingService, HotelBookingService>();
             builder.Services.AddScoped<IPassportService, PassportService>();
             builder.Services.AddScoped<IWishListService, WishListService>();
             builder.Services.AddScoped<IHotelService, HotelService>();
@@ -49,10 +46,17 @@ namespace Booking_API
             builder.Services.AddScoped<ICountryService, CountryService>();
             builder.Services.AddScoped<IService<City>, Service<City>>();
             builder.Services.AddScoped<IService<Country>, Service<Country>>();
-            builder.Services.AddScoped<IHotelBookingService, HotelBookingService>();
-            builder.Services.AddScoped<IHotelBookingRepository, HotelBookingRepository>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<ICarService, CarService>();
+            builder.Services.AddScoped<ICarAgencyService, CarAgencyServices>();
+            builder.Services.AddScoped<ICarRentalService, CarRentalService>();
+
+
+            builder.Services.AddScoped<IHotelBookingInvoiceService, HotelBookingInvoiceService>();
+            builder.Services.AddScoped<ICarRentalInvoiceService, CarRentalInvoiceService>();
             builder.Services.AddAutoMapper(typeof(MappingProfile));
+            builder.Services.AddSingleton<BraintreeService>();
 
 
             // Add JWT Authentication
@@ -74,6 +78,7 @@ namespace Booking_API
                     IssuerSigningKey = new SymmetricSecurityKey(key)
                 };
             });
+
             // Add CORS services to the container.
             builder.Services.AddCors(options =>
             {
@@ -88,7 +93,9 @@ namespace Booking_API
                                       .AllowAnyHeader()
                                       .AllowAnyMethod());
             });
+
             var app = builder.Build();
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -109,5 +116,7 @@ namespace Booking_API
 
             app.Run();
         }
+
+
     }
 }
