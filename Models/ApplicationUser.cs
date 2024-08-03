@@ -19,7 +19,7 @@ namespace Booking_API.Models
         public string? PhotoUrl { get; set; }
 
         [DataType(DataType.Date)]
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
 
         // Foreign keys
         [ForeignKey("WishList")]
@@ -30,13 +30,14 @@ namespace Booking_API.Models
         public int? CityId { get; set; }
 
         // Navigation Properties
-        public HotelWishList? WishList { get; set; }
-        public Passport? Passport { get; set; }
+        public HotelWishList? WishList { get; set; } = new HotelWishList();
+        public Passport? Passport { get; set; } = new Passport();
         public City? City { get; set; }
 
         public ICollection<HotelBooking>? Bookings { get; set; }
         public ICollection<HotelReview>? Reviews { get; set; }
-        public CarRentalInvoice? CarRentalInvoice { get; set; }
-        public HotelBookingInvoice? HotelBookingInvoice { get; set; }
+        public IEnumerable<CarRentalInvoice>? CarRentalInvoices { get; set; }
+        public IEnumerable<CarRental>? CarRentals { get; set; }
+        public IEnumerable<HotelBookingInvoice>? HotelBookingInvoices { get; set; }
     }
 }

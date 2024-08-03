@@ -72,6 +72,7 @@ namespace Booking_API.Services
             }
             return photos;
         }
+
         public async Task<IFormFile> ConvertByteArrayToIFormFile(byte[] byteArray, string? fileName = null, string contentType= "image/jpeg")
         {
             using (MemoryStream memoryStream = new MemoryStream(byteArray))

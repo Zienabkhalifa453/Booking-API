@@ -14,8 +14,7 @@ namespace Booking_API.Models
         [MaxLength(200)]
         public string? Address { get; set; }
 
-        [Url]
-        public string? LogoURL { get; set; }
+        public string? AgencyPhotoURL { get; set; }
 
         [Phone]
         public string? PhoneNumber { get; set; }
@@ -39,8 +38,8 @@ namespace Booking_API.Models
 
         // Navigation Properties
         public City? City { get; set; }
-        public CarRental? CarRental { get; set; }
+        public ICollection<CarRental>? CarRentals { get; set; }
         public ICollection<Car>? Cars { get; set; } = new HashSet<Car>();
-        public ICollection<CarAgencyReview>? CarAgencyReviews { get; set; } = new HashSet<CarAgencyReview>();
+        public ICollection<CarReview>? CarAgencyReviews { get; set; } = new HashSet<CarReview>();
     }
 }

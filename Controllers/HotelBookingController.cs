@@ -39,9 +39,28 @@ namespace Booking_API.Controllers
             var bookingDTOs = _mapper.Map<IEnumerable<HotelBookingViewDTO>>(bookings);
             return Ok(new GeneralResponse<IEnumerable<HotelBookingViewDTO>>(true, "Bookings retrieved successfully", bookingDTOs));
         }
-        
+
+        [HttpPost("GetFilteredUserBookings")]
+        public async Task<ActionResult<GeneralResponse<IEnumerable<HotelBookingViewDTO>>>> GetFilteredUserBookings([FromQuery] UserBookingFilterDTO filter)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new GeneralResponse<IEnumerable<HotelBookingViewDTO>>(false, "Invalid data", null));
+            }
+
+            try
+            {
+                var bookingDTOs = await _bookingService.GetFilteredUserBookingsAsync(filter);
+                return Ok(new GeneralResponse<IEnumerable<HotelBookingViewDTO>>(true, "Filtered bookings retrieved successfully", bookingDTOs));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new GeneralResponse<IEnumerable<HotelBookingViewDTO>>(false, ex.Message, null));
+            }
+        }
+
         [HttpGet("filtered")]
-        public async Task<ActionResult<GeneralResponse<IEnumerable<HotelBookingViewDTO>>>> GetFilteredHotelsAsync([FromQuery] HotelBookingFilterDTO filter)
+        public async Task<ActionResult<GeneralResponse<IEnumerable<HotelBookingViewDTO>>>> GetFilteredBookingsAsync([FromQuery] HotelBookingFilterDTO filter)
         {
             var filteredBookings = await _bookingService.GetFilteredBookingsAsync(filter);
 
@@ -134,6 +153,7 @@ namespace Booking_API.Controllers
             return Ok(new GeneralResponse<HotelBookingViewDTO>(true, "Booking deleted successfully", bookingDTO));
         }
 
+        #region Payment
         [HttpPost("checkout")]
         public async Task<IActionResult> Checkout([FromBody] PaymentRequest paymentRequest)
         {
@@ -191,6 +211,51 @@ namespace Booking_API.Controllers
             });
         }
 
+        [HttpPost("checkout/cash")]
+        public async Task<IActionResult> CheckoutCash([FromBody] PaymentRequest paymentRequest)
+        {
+            if (paymentRequest == null || paymentRequest.BookingData == null)
+            {
+                return BadRequest(new GeneralResponse<CreateHotelBookingDTO>(false, "Invalid data", null));
+            }
+
+            var bookingDto = paymentRequest.BookingData;
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new GeneralResponse<CreateHotelBookingDTO>(false, "Invalid booking data", bookingDto));
+            }
+
+            // Proceed with booking
+            bookingDto.Status = BookingStatus.Confirmed;
+            var bookingResponse = await _bookingService.CreateHotelBookingAsync(bookingDto);
+
+            if (!bookingResponse.Success)
+            {
+                return BadRequest(new GeneralResponse<CreateHotelBookingDTO>(false, "Booking creation failed", bookingDto));
+            }
+
+            // Create the invoice
+            var invoiceResponse = await _bookingService.CreateInvoiceAsync(
+                bookingResponse.Data,
+                paymentRequest.Amount,
+                bookingDto.UserId,
+                PaymentMethod.Cash
+            );
+
+            if (!invoiceResponse.Success)
+            {
+                var booking = await _bookingService.GetAsync(b => b.Id == bookingResponse.Data.Id);
+                await _bookingService.DeleteAsync(booking.Id);
+
+                return BadRequest(new GeneralResponse<CreateHotelBookingDTO>(false, "Invoice creation failed, booking deleted", bookingDto));
+            }
+
+            return Ok(new
+            {
+                Message = "Booking successful with cash payment"
+            });
+        }
 
 
         [HttpGet("client_token")]
@@ -198,11 +263,12 @@ namespace Booking_API.Controllers
         {
             var clientToken = await _braintreeService.GetClientTokenAsync();
             return Ok(new { clientToken });
-        }
+        } 
+        #endregion
     }
     public class PaymentRequest
     {
-        public string Nonce { get; set; }
+        public string? Nonce { get; set; }
         public decimal Amount { get; set; }
         public CreateHotelBookingDTO BookingData { get; set; }
     }

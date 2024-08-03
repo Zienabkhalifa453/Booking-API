@@ -9,7 +9,5 @@ namespace Booking_API.Services.IService
         Task<byte[]> GetPhotoFileContent(string photoUrl);
         Task<List<byte[]>> GetAllPhotos();
         Task<IFormFile> ConvertByteArrayToIFormFile(byte[] byteArray, string? fileName = null, string contentType= "image/jpeg");
-
-
     }
 }
